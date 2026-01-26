@@ -180,13 +180,8 @@
                     directly at info@shillypharma.com.
                 </div>
 
-                <form id="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-                    <!-- Netlify Honeypot (spam protection) -->
-                    <input type="hidden" name="form-name" value="contact">
-                    <p class="hp-field">
-                        <label>Don't fill this out if you're human: <input name="bot-field" /></label>
-                    </p>
-                    <!-- Legacy Honeypot -->
+                <form id="contact-form">
+                    <!-- Honeypot -->
                     <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off">
 
                     <div class="grid grid-2" style="gap: var(--space-md); margin-bottom: var(--space-lg);">
@@ -372,40 +367,32 @@
             errorMsg.style.display = 'none';
 
             const formData = new FormData(form);
-            
-            // Consolidate product builder items into a single field for Netlify
-            const productRows = productList.querySelectorAll('.product-row');
-            let itemizedProducts = [];
-            productRows.forEach(row => {
-                const productSelect = row.querySelector('select');
-                const qtyInput = row.querySelector('input[type="number"]');
-                if (productSelect && productSelect.value) {
-                    const qty = qtyInput ? qtyInput.value || 1 : 1;
-                    itemizedProducts.push(`${productSelect.value} (Qty: ${qty})`);
-                }
-            });
-            if (itemizedProducts.length > 0) {
-                formData.set('itemized_products', itemizedProducts.join('\n'));
-            }
 
             try {
-                // Submit to Netlify Forms
-                const response = await fetch('/', {
+                const response = await fetch('/send_quote.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams(formData).toString()
+                    body: formData
                 });
 
-                if (response.ok) {
+                const result = await response.json().catch(() => null);
+
+                if (response.ok && result && result.success) {
                     successMsg.style.display = 'block';
                     form.reset();
                     productList.innerHTML = '';
                 } else {
-                    throw new Error('Form submission failed');
+                    throw new Error(result?.message || 'Server error');
                 }
             } catch (err) {
                 console.error(err);
-                errorMsg.style.display = 'block';
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.warn("Dev Mode: Simulated Success");
+                    successMsg.style.display = 'block';
+                    form.reset();
+                    productList.innerHTML = '';
+                } else {
+                    errorMsg.style.display = 'block';
+                }
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Send Inquiry';
