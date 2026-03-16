@@ -426,6 +426,7 @@ nav {
   align-items: center;
   justify-content: space-between;
   height: 72px;
+  gap: var(--space-lg);
 }
 
 .logo {
@@ -435,10 +436,15 @@ nav {
   color: var(--brand-primary);
   font-weight: 800;
   font-size: 1.25rem;
+  flex-shrink: 0;
 }
 
 .nav-links {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-width: 0;
   gap: var(--space-lg);
   list-style: none;
 }
@@ -458,6 +464,7 @@ nav {
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  flex-shrink: 0;
 }
 
 .theme-toggle {
@@ -489,7 +496,7 @@ html[data-theme="dark"] .moon-icon {
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1120px) {
   .nav-links {
     display: none;
     /* hidden default */
